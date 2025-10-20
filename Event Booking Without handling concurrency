@@ -1,0 +1,124 @@
+// Online Java Compiler
+// Use this editor to write, compile and run your Java code online
+import java.util.*;
+enum BookingStatus{
+    RESERVED, CONFIRMED, CANCELLED
+}
+
+class Event{
+    int eventId;
+    int seats;
+    Set<Integer> bookedSeats;
+    
+    Event(int eventId, int seats){
+        this.eventId = eventId;
+        this.seats = seats;
+        this.bookedSeats = new HashSet<>();
+    }
+    
+    public int getEventId(){
+        return this.eventId;
+    }
+    
+    public boolean reserveSeats(List<Integer> bookSeats){
+        for(int seat : bookSeats){
+            if(seat>seats || seat<1 || bookedSeats.contains(seat)){
+                return false;
+            }
+        }
+        bookedSeats.addAll(bookSeats);
+        return true;
+    }
+    
+    public void releaseSeats(List<Integer> seats){
+        bookedSeats.removeAll(seats);
+    }
+}
+
+class Booking{
+    private status int counter = 1;
+    int bookingId;
+    int eventId;
+    int userId;
+    List<Integer> seats;
+    BookingStatus status;
+    Booking(int eventId, int userId, List<Integer> seats){
+        this.bookingId = this.counter++;
+        this.eventId = eventId;
+        this.userId = userId;
+        this.seats = seats;
+        this.status = BookingStatus.RESERVED;
+    }
+    
+    public int getBookingId(){
+        return this.bookingId;
+    }
+    public void confirm(){
+        this.status = BookingStatus.CONFIRMED;
+    }
+    
+    public void cancel(){
+        this.status = BookingStatus.CANCELLED;
+    }
+}
+
+class BookingService{
+    private Map<Integer, Event> events = new HashMap<>();
+    private Map<Integer, Booking> bookings = new HashMap<>();
+    
+    public void addEvent(Event event){
+        events.put(event.getEventId(),event);
+    } 
+    public Booking reserveBooking(int eventId, int userId, List<Integer> seats){
+        Event event = events.get(eventId);
+        if(event==null){
+            throw new Exception("Give valid eventId");
+        }
+        Booking booking = new Booking(eventId, userId, seats);
+        boolean isReserved = event.reserveSeats(seats);
+        if(isReserved){
+            bookings.put(booking.bookingId, booking);
+            return booking;
+        }else{
+            return null;
+        }
+    }
+    
+    public void confirmBooking(int bookingId){
+        Booking booking = bookings.get(bookingId);
+        if(booking!=null && booking.status == BookingStatus.RESERVED){
+            booking.confirm();
+            System.out.println("Booking confirmed");
+        }else{
+            System.out.println("Give a valid bookingId");
+        }
+    }
+    
+    public void cancelBooking(){
+        Booking booking = bookings.get(bookingId);
+    if (booking == null) {
+        System.out.println("Invalid booking");
+        return;
+    }
+    Event event = events.get(booking.eventId);
+    if(event == null) {
+        System.out.println("Invalid booking");
+        return;
+    }
+    event.releaseSeats(booking.seats);
+    booking.cancel();
+    System.out.println("Booking cancelled");
+    }
+}
+
+class Main {
+    public static void main(String[] args) {
+        BookingService bookingService = new BookingService();
+        Event event = new Event(101, 3);
+        bookingService.addEvent(event);
+        Booking b1 = bookingService.reserveBooking(101, 1, List.of(1,2,3));
+        Booking b2 = bookingService.reserveBooking(101, 2, List.of(1,2,4));
+        b1.confirmBooking(b1.bookingId);
+        
+    }
+}
