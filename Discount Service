@@ -1,0 +1,47 @@
+interface PricingStrategy{
+    double applyDiscount(double kms, String time);
+}
+
+class RegPricingStrategy implements PricingStrategy{
+    @Override
+    public double applyDiscount(double kms, String time){
+        if(dayOfWeek.equals("Saturday") || dayOfWeek.equals("Sunday")){
+            return price*1.1;
+        }
+        return price;
+    }
+}
+
+class StudentPricingStrategy implements PricingStrategy{
+    @Override
+    public double applyDiscount(double kms, String time){
+        if(dayOfWeek.equals("Saturday") || dayOfWeek.equals("Sunday")){
+            return price;
+        }
+        return price*0.8;
+    }
+}
+
+class PricingStrategyFactory{
+    static PricingStrategy getStrategy(String code){
+        switch(code){
+            case "Economy" : return new RegPricingStrategy();
+            case "Premium" : return new StudentPricingStrategy();
+            default : throw new IllegalArgumentException("Invalid category code");
+        }
+    }
+}
+
+class PriceCalculator{
+    static void calculatePrice(String bookingId, double price, String dayOfWeek){
+        String categoryCode = bookingId.substring(0,3);
+        PricingStrategy strategy = PricingStrategyFactory.getStrategy(categoryCode);
+        System.out.println(String.format("Final price %.2f",strategy.applyDiscount(price, dayOfWeek)));
+    }
+}
+class Main {
+    public static void main(String[] args) {
+        PriceCalculator.calculatePrice("REG1001", 100.00,"Saturday");
+        PriceCalculator.calculatePrice("STU2001", 80.00, "Monday");
+    }
+}
